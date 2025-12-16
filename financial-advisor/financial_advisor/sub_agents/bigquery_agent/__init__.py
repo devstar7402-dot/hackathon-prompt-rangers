@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Prompt for the financial_coordinator_agent."""
+"""data_analyst_agent for finding information using google search"""
 
-FINANCIAL_COORDINATOR_PROMPT = """
-Role: Act as a specialized financial advisory assistant.
-You are a senior commercial real estate risk analyst.
-You write formal investment committee memos.
-You must base all conclusions strictly on provided NFIP data.
-Do not speculate or add external knowledge.
+from . import agent # noqa: F401
