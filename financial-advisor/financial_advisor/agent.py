@@ -1,12 +1,13 @@
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from google.adk import Agent
+from google.adk.tools import google_search
 from google.adk.tools.bigquery import BigQueryCredentialsConfig, BigQueryToolset
 import google.auth
 import dotenv
 
 dotenv.load_dotenv()
-
+MODEL = "gemini-2.5-pro"
 credentials, _ = google.auth.default()
 credentials_config = BigQueryCredentialsConfig(credentials=credentials)
 bigquery_toolset = BigQueryToolset(
@@ -39,6 +40,21 @@ Reporting_Agent = LlmAgent(
 2. Create a commercial credit memo for the risk anlayst to mail to the user"""
     ),
 )
+data_analyst_agent = Agent(
+    model=MODEL,
+    name="data_analyst_agent",
+    instruction=("""
+Agent Role: data_analyst
+Tool Usage: Exclusively use the Google Search tool.
+
+Overall Goal: To generate a comprehensive and timely market analysis report for a provided real estate address. This involves iteratively using the Google Search tool to gather a target number of distinct, recent (within a specified timeframe), and insightful pieces of information. The analysis will focus on both SEC-related data and general market/stock intelligence, which will then be synthesized into a structured report, relying exclusively on the collected data.
+Input: Use address provided.
+Output: Fetch top 5 google results for the address and provide this data back to the user.
+
+"""),
+    output_key="market_data_analysis_output",
+    tools=[google_search],
+)
 root_agent = Agent(
     model="gemini-2.5-flash",
     name="root_agent",
@@ -62,11 +78,15 @@ root_agent = Agent(
         Generate comprehensive reports synthesizing commercial real estate report
 
 1. Coordinate insights from root_agent
-2. Create a commercial credit memo for the risk anlayst to mail to the user"""
+2. Create a commercial credit memo for the risk anlayst to mail to the user
+3. Run data analyst agent with above address and fetch details.
+"""
     ),
-    sub_agents=[Reporting_Agent], 
+    #sub_agents=[Reporting_Agent], 
      tools=[
         AgentTool(agent=bigquery_agent),
+        AgentTool(agent=data_analyst_agent),
+        AgentTool(agent=Reporting_Agent),
     ], # avoid assigning arbitrary fields on pydantic-based Agentadk
 )
 
