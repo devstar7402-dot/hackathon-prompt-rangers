@@ -1,0 +1,9 @@
+.adk/
+
+# Hidden files
+.*
+!.git/
+!.gitignore
+
+# Python cache files
+__pycache__/
